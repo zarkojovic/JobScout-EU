@@ -1,0 +1,67 @@
+import 'dotenv/config';
+import { loadProfile } from './profiles';
+import { scrapeProfile } from './scrapers/linkedin';
+import { applyHardFilters } from './hardFilters';
+import { scoreJobs } from './scorer';
+import { sendDigest } from './notifier';
+import { logResults } from './logger';
+
+async function main() {
+  const startTime = Date.now();
+  const today = new Date();
+  const profile = loadProfile();
+
+  console.log(`🚀 JobScout EU starting — profile: ${profile.name}`);
+  console.log(`📅 Date: ${today.toISOString().slice(0, 10)}\n`);
+
+  // 1. Scrape LinkedIn across all profile target locations
+  let rawJobs = await scrapeProfile(profile.scraper);
+
+  if (rawJobs.length === 0) {
+    console.error('\n❌ No jobs found. LinkedIn may be blocking requests. Exiting.');
+    process.exit(1);
+  }
+
+  // 2. Apply hard filters (fast, no API cost)
+  const { kept, skipped } = applyHardFilters(rawJobs, profile.filterRules);
+  console.log(`\n🔽 Hard filters: ${kept.length} kept, ${skipped.length} skipped`);
+  for (const { job, reason } of skipped) {
+    console.log(`   SKIP: ${job.title} @ ${job.company} — ${reason}`);
+  }
+
+  // 3. Score remaining jobs (rule-based, no API cost)
+  const scoredKept = scoreJobs(kept, profile.scoringRules, profile.scoreCap);
+
+  // Merge: hard-filtered jobs get score 0 and skip=true
+  const allScored = [
+    ...scoredKept,
+    ...skipped.map(({ job, reason }) => ({
+      ...job,
+      score: 0,
+      summary: reason,
+      breakdown: {},
+      skip: true,
+      skipReason: reason,
+    })),
+  ];
+
+  // 4. Save full log
+  await logResults(allScored, today, profile.logFilename(today));
+
+  // 5. Send Telegram digest
+  await sendDigest(
+    profile.telegramBotToken,
+    profile.telegramChatId,
+    allScored,
+    today,
+    profile.digest
+  );
+
+  const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+  console.log(`\n✅ Done in ${elapsed}s`);
+}
+
+main().catch(err => {
+  console.error('\n💥 Fatal error:', err);
+  process.exit(1);
+});

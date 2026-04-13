@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(mkdir -p /home/zarko/Documents/jobscout-eu/src/scrapers /home/zarko/Documents/jobscout-eu/logs)",
+      "Bash(touch /home/zarko/Documents/jobscout-eu/logs/.gitkeep)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(node:*)",
+      "Bash(crontab -)",
+      "Bash(crontab -l)",
+      "Bash(chmod +x /home/zarko/Documents/jobscout-eu/run.sh)",
+      "Bash(wc -l /home/zarko/Documents/jobscout-eu/src/*.ts /home/zarko/Documents/jobscout-eu/src/scrapers/*.ts)",
+      "Bash(chmod +x:*)",
+      "Bash(ls /home/zarko/Documents/jobscout-eu/run*.sh)"
+    ]
+  }
+}
