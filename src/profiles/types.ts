@@ -46,5 +46,6 @@ export interface ProfileConfig {
   filterRules: FilterRule[];
   scoringRules: ScoringRule[];
   scoreCap: number;
+  geminiCriteriaBlock?: string;
   digest: DigestConfig;
 }

@@ -29,8 +29,8 @@ async function main() {
     console.log(`   SKIP: ${job.title} @ ${job.company} — ${reason}`);
   }
 
-  // 3. Score remaining jobs (rule-based, no API cost)
-  const scoredKept = scoreJobs(kept, profile.scoringRules, profile.scoreCap);
+  // 3. Score remaining jobs (Gemini AI if key set, otherwise rule-based)
+  const scoredKept = await scoreJobs(kept, profile.scoringRules, profile.scoreCap, profile.geminiCriteriaBlock);
 
   // Merge: hard-filtered jobs get score 0 and skip=true
   const allScored = [

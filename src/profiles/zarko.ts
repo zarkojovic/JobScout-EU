@@ -72,11 +72,16 @@ export const zarkoProfile: ProfileConfig = {
 
   scraper: {
     locations: [
+      // Netherlands (primary — IND sponsor route)
       { label: 'Amsterdam, Netherlands', geoId: '102890719', locationParam: 'Amsterdam, Netherlands' },
-      { label: 'Berlin, Germany',        geoId: '106967730', locationParam: 'Berlin, Germany' },
-      { label: 'Munich, Germany',        geoId: '106671392', locationParam: 'Munich, Germany' },
+      { label: 'Utrecht, Netherlands',   geoId: '102011677', locationParam: 'Utrecht, Netherlands' },
+      { label: 'Eindhoven, Netherlands', geoId: '103347519', locationParam: 'Eindhoven, Netherlands' },
+      // Austria
       { label: 'Vienna, Austria',        geoId: '102062298', locationParam: 'Vienna, Austria' },
+      // Spain
       { label: 'Barcelona, Spain',       geoId: '100994331', locationParam: 'Barcelona, Spain' },
+      { label: 'Madrid, Spain',          geoId: '101714026', locationParam: 'Madrid, Spain' },
+      { label: 'Valencia, Spain',        geoId: '102448183', locationParam: 'Valencia, Spain' },
     ],
     queries: ['fullstack developer', 'backend developer'],
   },
@@ -149,11 +154,33 @@ export const zarkoProfile: ProfileConfig = {
 
   scoreCap: 10,
 
+  geminiCriteriaBlock: `
+Candidate: Žarko Jović — Serbian national (non-EU), needs visa sponsorship to work in Europe.
+Stack: PHP/Laravel, C#/ASP.NET, Node.js, React, Vue.js, TypeScript. Cloud: AWS (EC2, S3, Lambda, RDS). DB: MySQL, PostgreSQL.
+Experience: ~3.5 years. Current role: Full-stack at Clarivate (PHP + React). Education: CS/EE bachelor, GPA 9.2.
+Languages: Serbian (native), English (C1), German (basic A1/A2).
+
+Scoring criteria (add points cumulatively, max 10 total):
+1. Visa sponsorship OR relocation package explicitly mentioned → +3 (most important)
+2. Netherlands location AND company is a known IND-registered sponsor (Booking.com, Adyen, ASML, TomTom, Mollie, Philips, ING, etc.) → +2
+3. Tech stack match: PHP/Laravel OR C#/ASP.NET OR Node.js mentioned → +2
+4. English-speaking/international team, or job description written in English → +2
+5. AWS or cloud infrastructure experience valued → +1
+6. React or Vue.js mentioned → +1
+7. Mid-level or senior role (medior, mid-level, mid-senior) — NOT junior-only → +1
+8. Remote-first, fully remote, or hybrid work → +1
+
+Hard dealbreakers (score 1-3 even if other criteria match):
+- Role requires Dutch/German/French/Spanish fluency
+- Pure outsourcing or staffing agency
+- Requires 5+ years experience
+`.trim(),
+
   digest: {
     minScore: 7,
     maxJobs: 8,
     headerLine: (count: number) =>
-      `_Top ${count} match${count > 1 ? 'es' : ''} across NL · DE · AT · ES_`,
+      `_Top ${count} match${count > 1 ? 'es' : ''} across NL · AT · ES_`,
     displayFields: [
       { label: 'Visa sponsorship', field: 'visaSponsorship' },
       { label: 'English team',     field: 'englishTeam' },
@@ -163,10 +190,9 @@ export const zarkoProfile: ProfileConfig = {
       job.breakdown['indSponsor'] ? '⭐ IND Sponsor\n' : '',
     locationFlag: (location: string) => {
       const loc = location.toLowerCase();
-      if (/germany|berlin|munich|münchen/.test(loc)) return '🇩🇪';
-      if (/austria|vienna|wien/.test(loc))           return '🇦🇹';
-      if (/spain|barcelona|madrid/.test(loc))         return '🇪🇸';
-      return '🇳🇱';
+      if (/austria|vienna|wien/.test(loc))                   return '🇦🇹';
+      if (/spain|barcelona|madrid|valencia/.test(loc))        return '🇪🇸';
+      return '🇳🇱';  // Amsterdam, Utrecht, Eindhoven
     },
   },
 };

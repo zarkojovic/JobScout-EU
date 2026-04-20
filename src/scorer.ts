@@ -1,5 +1,6 @@
 import { RawJob, ScoredJob, ScoreBreakdown } from './types';
 import { ScoringRule } from './profiles/types';
+import { scoreJobsWithAI } from './aiScorer';
 
 function scoreJob(job: RawJob, rules: ScoringRule[], cap: number): ScoredJob {
   const breakdown: ScoreBreakdown = {};
@@ -25,16 +26,25 @@ function scoreJob(job: RawJob, rules: ScoringRule[], cap: number): ScoredJob {
   };
 }
 
-export function scoreJobs(jobs: RawJob[], rules: ScoringRule[], cap: number): ScoredJob[] {
+export function scoreJobsRuleBased(jobs: RawJob[], rules: ScoringRule[], cap: number): ScoredJob[] {
   console.log(`\n📊 Scoring ${jobs.length} jobs (rule-based)...`);
-  const results: ScoredJob[] = [];
-
-  for (let i = 0; i < jobs.length; i++) {
-    const job = jobs[i];
+  return jobs.map((job, i) => {
     const scored = scoreJob(job, rules, cap);
     console.log(`  [${i + 1}/${jobs.length}] ${job.title} @ ${job.company} → ${scored.score}/10`);
-    results.push(scored);
-  }
+    return scored;
+  });
+}
 
-  return results;
+export async function scoreJobs(
+  jobs: RawJob[],
+  rules: ScoringRule[],
+  cap: number,
+  geminiCriteriaBlock?: string
+): Promise<ScoredJob[]> {
+  if (process.env.GROQ_API_KEY && geminiCriteriaBlock) {
+    return scoreJobsWithAI(jobs, geminiCriteriaBlock, cap,
+      (batch) => scoreJobsRuleBased(batch, rules, cap));
+  }
+  console.log('\n⚠️  GROQ_API_KEY not set — using rule-based scoring');
+  return scoreJobsRuleBased(jobs, rules, cap);
 }
