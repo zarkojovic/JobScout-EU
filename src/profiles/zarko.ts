@@ -8,13 +8,14 @@ const JUNIOR_PATTERN        = /\bjunior\b/i;
 const NOT_JUNIOR_PATTERN    = /\b(medior|mid[-\s]?level|mid[-\s]?senior|senior)\b/i;
 const PURE_FRONTEND_TITLES  = /\b(frontend|front-end|front end|ui developer|react developer|vue developer|angular developer)\b/i;
 const BACKEND_SIGNAL        = /\b(backend|back-end|back end|full.?stack|fullstack|php|laravel|node\.?js|c#|asp\.net|java|python|ruby|go|rust|api|server)\b/i;
-const AGENCY_PATTERN        = /\b(outsourc|staffing|consulting firm|IT solutions|nearshore|offshore|body shop)\b/i;
+const AGENCY_PATTERN        = /\b(outsourc|staffing|consulting firm|nearshore|offshore|body shop)\b/i;
 const FLUENCY_REQUIRED      = /\b(fluent|proficient|native|business.level)\s+(dutch|german|french|spanish)\b/i;
+const UK_LOCATION_PATTERN   = /united kingdom|london|manchester|birmingham|edinburgh|\buk\b|england|scotland|wales/i;
 const OVERQUALIFIED_YEARS   = [
-  /\b([5-9]|\d{2})\s*\+\s*years?\s*(of\s*)?(professional\s*)?experience\b/i,
-  /\b([5-9]|\d{2})\s+years?\s+(of\s+)?(professional\s+)?experience\b/i,
-  /\b(?:minimum|at\s+least|minimum\s+of)\s+([5-9]|\d{2})\s+years?\b/i,
-  /\b([5-9]|\d{2})[–\-]\d+\s+years?\s*(of\s*)?experience\b/i,
+  /\b([7-9]|\d{2})\s*\+\s*years?\s*(of\s*)?(professional\s*)?experience\b/i,
+  /\b([7-9]|\d{2})\s+years?\s+(of\s+)?(professional\s+)?experience\b/i,
+  /\b(?:minimum|at\s+least|minimum\s+of)\s+([7-9]|\d{2})\s+years?\b/i,
+  /\b([7-9]|\d{2})[–\-]\d+\s+years?\s*(of\s*)?experience\b/i,
 ];
 
 // ---------------------------------------------------------------------------
@@ -25,7 +26,7 @@ const STACK_PATTERN    = /\bphp\b|laravel|symfony|\bc#\b|asp\.net|\.net\s+(core|
 const ENGLISH_EXPLICIT = /english.{0,20}(work(ing)?|team|environment|language|office)|work(ing)?\s+language.{0,10}english|international\s+team|english.?speaking|all.communication.in.english/i;
 const AWS_PATTERN      = /\baws\b|amazon\s+web\s+services|\bec2\b|\bs3\b|\blambda\b|\brds\b|cloudformation|\beks\b|\becs\b|\bsqs\b|\bsns\b/i;
 const REACT_VUE_PATTERN   = /\breact\b|react\.?js|\bvue\.?js|\bvue\b/i;
-const MID_SENIOR_PATTERN  = /\b(medior|mid[-\s]?level|mid[-\s]?senior)\b/i;
+const MID_SENIOR_PATTERN  = /\b(medior|mid[-\s]?level|mid[-\s]?senior|senior)\b/i;
 const REMOTE_HYBRID_PATTERN = /\b(remote[-\s]first|fully\s+remote|hybrid|work\s+from\s+home|\bwfh\b|flexible\s+(work(ing)?|location))\b/i;
 
 // Known IND-registered sponsors in the Netherlands
@@ -83,7 +84,7 @@ export const zarkoProfile: ProfileConfig = {
       { label: 'Madrid, Spain',          geoId: '101714026', locationParam: 'Madrid, Spain' },
       { label: 'Valencia, Spain',        geoId: '102448183', locationParam: 'Valencia, Spain' },
     ],
-    queries: ['fullstack developer', 'backend developer'],
+    queries: ['fullstack developer', 'backend developer', 'software engineer', 'software developer', 'web developer'],
   },
 
   filterRules: [
@@ -106,6 +107,10 @@ export const zarkoProfile: ProfileConfig = {
     {
       reason: 'Requires 5+ years experience (over-qualified threshold)',
       test: (job: RawJob) => OVERQUALIFIED_YEARS.some(p => p.test(job.description)),
+    },
+    {
+      reason: 'UK_LOCATION',
+      test: (job: RawJob) => UK_LOCATION_PATTERN.test(job.location),
     },
   ],
 
