@@ -42,7 +42,8 @@ export async function scoreJobs(
   geminiCriteriaBlock?: string
 ): Promise<ScoredJob[]> {
   if (process.env.GROQ_API_KEY && geminiCriteriaBlock) {
-    return scoreJobsWithAI(jobs, geminiCriteriaBlock, cap,
+    const breakdownFields = rules.map(r => r.field);
+    return scoreJobsWithAI(jobs, geminiCriteriaBlock, cap, breakdownFields,
       (batch) => scoreJobsRuleBased(batch, rules, cap));
   }
   console.log('\n⚠️  GROQ_API_KEY not set — using rule-based scoring');

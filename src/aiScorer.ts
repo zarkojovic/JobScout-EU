@@ -7,7 +7,14 @@ function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function buildPrompt(job: RawJob, criteriaBlock: string): string {
+const DEFAULT_BREAKDOWN_FIELDS = [
+  'visaSponsorship', 'indSponsor', 'stackMatch', 'englishTeam',
+  'awsValued', 'reactVue', 'midSenior', 'remoteHybrid',
+];
+
+function buildPrompt(job: RawJob, criteriaBlock: string, breakdownFields?: string[]): string {
+  const fields = breakdownFields ?? DEFAULT_BREAKDOWN_FIELDS;
+  const breakdownShape = fields.map(f => `    "${f}": <true|false>`).join(',\n');
   return `
 You are a job-fit scorer for a specific candidate. Evaluate the following job posting.
 
@@ -27,18 +34,11 @@ Return ONLY valid JSON with this exact shape (no markdown fences):
   "score": <integer 1-10>,
   "summary": "<one sentence: role + company + top reason for this score>",
   "breakdown": {
-    "visaSponsorship": <true|false>,
-    "indSponsor": <true|false>,
-    "stackMatch": <true|false>,
-    "englishTeam": <true|false>,
-    "awsValued": <true|false>,
-    "reactVue": <true|false>,
-    "midSenior": <true|false>,
-    "remoteHybrid": <true|false>
+${breakdownShape}
   }
 }
 
-Score 1-10 where 10 = perfect match. Only 8+ if visa/relocation explicitly mentioned AND stack matches.
+Score 1-10 where 10 = perfect match.
 `.trim();
 }
 
@@ -46,6 +46,7 @@ export async function scoreJobsWithAI(
   jobs: RawJob[],
   criteriaBlock: string,
   cap: number,
+  breakdownFields: string[] | undefined,
   fallbackFn: (jobs: RawJob[]) => ScoredJob[]
 ): Promise<ScoredJob[]> {
   const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
@@ -62,7 +63,7 @@ export async function scoreJobsWithAI(
 
       const response = await groq.chat.completions.create({
         model: 'llama-3.3-70b-versatile',
-        messages: [{ role: 'user', content: buildPrompt(job, criteriaBlock) }],
+        messages: [{ role: 'user', content: buildPrompt(job, criteriaBlock, breakdownFields) }],
         temperature: 0.1,
         response_format: { type: 'json_object' },
       });

@@ -9,7 +9,7 @@ const EVA_AGENCY_PATTERN   = /\b(advertising\s+agency|media\s+agency|creative\s+
 const JUNIOR_COORD_PATTERN = /\b(junior|coordinator|assistant\s+market(ing)?)\b/i;
 const RETAIL_PATTERN       = /\b(retail|fast\s+fashion|fmcg|consumer\s+goods)\b/i;
 const MEDIA_ADV_PATTERN    = /\b(media\s+company|publishing\s+company|broadcast|advertising\s+firm|pr\s+agency)\b/i;
-const DUTCH_GERMAN_FLUENCY = /\b(fluent|proficient|native|business.level)\s+(dutch|german)\b/i;
+const US_WORK_AUTH_PATTERN  = /\b(must\s+be\s+(authorized|eligible)\s+to\s+work\s+in\s+(the\s+)?us|us\s+work\s+authorization|authorized\s+to\s+work\s+in\s+the\s+united\s+states|us\s+citizen|green\s+card|permanent\s+resident|visa\s+sponsorship\s+(is\s+)?(not|unavailable|cannot)|cannot\s+sponsor|not\s+able\s+to\s+sponsor)/i;
 
 // ---------------------------------------------------------------------------
 // Scoring patterns
@@ -98,8 +98,10 @@ export const evaProfile: ProfileConfig = {
       test: (job: RawJob) => MEDIA_ADV_PATTERN.test(job.description),
     },
     {
-      reason: 'Requires Dutch/German fluency',
-      test: (job: RawJob) => DUTCH_GERMAN_FLUENCY.test(job.description),
+      reason: 'US role requires US work authorization',
+      test: (job: RawJob) =>
+        /united\s+states|new\s+york|san\s+francisco|california/i.test(job.location) &&
+        US_WORK_AUTH_PATTERN.test(job.description),
     },
   ],
 
@@ -152,6 +154,27 @@ export const evaProfile: ProfileConfig = {
   ],
 
   scoreCap: 10,
+
+  geminiCriteriaBlock: `
+Candidate: Eva Umanjec — EU citizen (Dutch national), based in Amsterdam. No visa restrictions within EU. Can work remotely for US/SG companies without work authorization.
+Background: 10+ years in marketing/communications. Current role: Global Content & Communications Manager at Zanders (fintech/wealth management).
+Tools: HubSpot, Salesforce, Sprinklr, Meta Ads, Google Analytics/GA4, Adobe Suite, Canva, Figma, WordPress, Mailchimp.
+Languages: English (native), Dutch (native), Serbian (native), German (conversational).
+
+Scoring criteria (add points cumulatively, max 10 total):
+1. B2B industry (fintech, SaaS, wealth management, financial services, luxury) → +3
+2. Senior or manager-level role (not coordinator/junior) → +2
+3. Remote-first or fully remote → +2
+4. HubSpot or Salesforce mentioned → +2
+5. Growth marketing or demand generation focus → +2
+6. Analytics or performance marketing mentioned → +1
+7. International or global scope → +1
+8. Paid social / Meta Ads mentioned → +1
+9. English-speaking team or job posted in English → +1
+
+Hard disqualifiers (score 1 regardless): pure social media execution, advertising agency, junior/coordinator title, retail industry, media/broadcasting company.
+For US-based roles: only valid if fully remote (no relocation or US work authorization required).
+  `.trim(),
 
   digest: {
     minScore: 7,
