@@ -1,10 +1,13 @@
 import 'dotenv/config';
 import { loadProfile } from './profiles';
 import { scrapeProfile } from './scrapers/linkedin';
+import { scrapeKarriereAt } from './scrapers/karriere-at';
+import { scrapeTecnoempleo } from './scrapers/tecnoempleo';
 import { applyHardFilters } from './hardFilters';
 import { scoreJobs } from './scorer';
 import { sendDigest } from './notifier';
 import { logResults } from './logger';
+import { RawJob } from './types';
 
 async function main() {
   const startTime = Date.now();
@@ -15,21 +18,37 @@ async function main() {
   console.log(`📅 Date: ${today.toISOString().slice(0, 10)}\n`);
 
   // 1. Scrape LinkedIn across all profile target locations
-  let rawJobs = await scrapeProfile(profile.scraper);
+  let rawJobs: RawJob[] = await scrapeProfile(profile.scraper);
 
   if (rawJobs.length === 0) {
-    console.error('\n❌ No jobs found. LinkedIn may be blocking requests. Exiting.');
+    console.error('\n❌ No jobs found from LinkedIn. Continuing with additional sources if configured.');
+  }
+
+  // 2. Scrape additional sources (karriere.at, Tecnoempleo, etc.)
+  for (const source of profile.additionalSources ?? []) {
+    let extra: RawJob[] = [];
+    if (source.type === 'karriere-at') {
+      extra = await scrapeKarriereAt(source.queries, source.location);
+    } else if (source.type === 'tecnoempleo') {
+      extra = await scrapeTecnoempleo(source.queries);
+    }
+    const existingUrls = new Set(rawJobs.map(j => j.url));
+    rawJobs.push(...extra.filter(j => !existingUrls.has(j.url)));
+  }
+
+  if (rawJobs.length === 0) {
+    console.error('\n❌ No jobs found from any source. Exiting.');
     process.exit(1);
   }
 
-  // 2. Apply hard filters (fast, no API cost)
+  // 3. Apply hard filters (fast, no API cost)
   const { kept, skipped } = applyHardFilters(rawJobs, profile.filterRules);
   console.log(`\n🔽 Hard filters: ${kept.length} kept, ${skipped.length} skipped`);
   for (const { job, reason } of skipped) {
     console.log(`   SKIP: ${job.title} @ ${job.company} — ${reason}`);
   }
 
-  // 3. Score remaining jobs (Gemini AI if key set, otherwise rule-based)
+  // 4. Score remaining jobs (Groq AI if key set, otherwise rule-based)
   const scoredKept = await scoreJobs(kept, profile.scoringRules, profile.scoreCap, profile.geminiCriteriaBlock);
 
   // Merge: hard-filtered jobs get score 0 and skip=true
@@ -45,10 +64,10 @@ async function main() {
     })),
   ];
 
-  // 4. Save full log
+  // 5. Save full log
   await logResults(allScored, today, profile.logFilename(today));
 
-  // 5. Send Telegram digest
+  // 6. Send Telegram digest
   await sendDigest(
     profile.telegramBotToken,
     profile.telegramChatId,

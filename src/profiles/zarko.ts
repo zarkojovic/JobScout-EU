@@ -87,6 +87,18 @@ export const zarkoProfile: ProfileConfig = {
     queries: ['fullstack developer', 'backend developer', 'software engineer', 'software developer', 'web developer'],
   },
 
+  additionalSources: [
+    {
+      type: 'karriere-at',
+      location: 'wien',
+      queries: ['backend developer', 'fullstack developer', 'php developer', 'software developer', 'dotnet developer'],
+    },
+    {
+      type: 'tecnoempleo',
+      queries: ['backend developer', 'fullstack developer', 'php developer', 'nodejs developer'],
+    },
+  ],
+
   filterRules: [
     {
       reason: 'Pure frontend role',

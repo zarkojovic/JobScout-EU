@@ -37,12 +37,19 @@ export interface DigestConfig {
   locationFlag: (location: string) => string;  // e.g. "🇳🇱"
 }
 
+export interface AdditionalSource {
+  type: 'karriere-at' | 'tecnoempleo';
+  queries: string[];
+  location?: string; // karriere-at: location slug e.g. 'wien'; tecnoempleo: ignored
+}
+
 export interface ProfileConfig {
   name: string;
   telegramBotToken: string;
   telegramChatId: string;
   logFilename: (date: Date) => string;
   scraper: ScraperConfig;
+  additionalSources?: AdditionalSource[];
   filterRules: FilterRule[];
   scoringRules: ScoringRule[];
   scoreCap: number;
