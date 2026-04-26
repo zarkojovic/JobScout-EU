@@ -28,7 +28,7 @@ async function get(url: string): Promise<string | null> {
 
 type CardStub = { jobId: string; title: string; company: string; location: string; url: string };
 
-function parseListingPage(html: string): CardStub[] {
+function parseListingPage(html: string, defaultLocation: string): CardStub[] {
   const $ = cheerio.load(html);
   const seen = new Set<string>();
   const results: CardStub[] = [];
@@ -60,8 +60,7 @@ function parseListingPage(html: string): CardStub[] {
       }
     }
 
-    // All jobs from this scraper use modalidad_trabajo=3 (remote only)
-    results.push({ jobId, title, company, location: 'Remote, Spain', url: fullHref });
+    results.push({ jobId, title, company, location: defaultLocation, url: fullHref });
   }
 
   return results;
@@ -89,22 +88,24 @@ async function fetchDescription(url: string): Promise<{ company: string; descrip
   };
 }
 
-export async function scrapeTecnoempleo(queries: string[]): Promise<RawJob[]> {
-  console.log('\n🔍 Scraping Tecnoempleo — Spain (remote)...');
+export async function scrapeTecnoempleo(queries: string[], remoteOnly = true): Promise<RawJob[]> {
+  const label = remoteOnly ? 'remote' : 'all';
+  const defaultLocation = remoteOnly ? 'Remote, Spain' : 'Spain';
+  console.log(`\n🔍 Scraping Tecnoempleo — Spain (${label})...`);
   const jobMap = new Map<string, RawJob>();
 
   for (const query of queries) {
     for (let page = 1; page <= MAX_PAGES; page++) {
       const url = new URL(`${BASE}/busqueda-empleo.php`);
       url.searchParams.set('te', query);
-      url.searchParams.set('modalidad_trabajo', '3'); // remote only
+      if (remoteOnly) url.searchParams.set('modalidad_trabajo', '3');
       url.searchParams.set('pagina', String(page));
 
       process.stdout.write(`  Query: "${query}" page ${page}... `);
       const html = await get(url.toString());
       if (!html) { console.log('⚠️  failed'); break; }
 
-      const cards = parseListingPage(html);
+      const cards = parseListingPage(html, defaultLocation);
       console.log(`${cards.length} cards`);
       if (cards.length === 0) break;
 

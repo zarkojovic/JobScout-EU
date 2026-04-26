@@ -30,7 +30,7 @@ async function main() {
     if (source.type === 'karriere-at') {
       extra = await scrapeKarriereAt(source.queries, source.location);
     } else if (source.type === 'tecnoempleo') {
-      extra = await scrapeTecnoempleo(source.queries);
+      extra = await scrapeTecnoempleo(source.queries, source.remoteOnly ?? true);
     }
     const existingUrls = new Set(rawJobs.map(j => j.url));
     rawJobs.push(...extra.filter(j => !existingUrls.has(j.url)));

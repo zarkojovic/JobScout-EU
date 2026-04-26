@@ -21,7 +21,7 @@ const OVERQUALIFIED_YEARS   = [
 // ---------------------------------------------------------------------------
 // Scoring patterns
 // ---------------------------------------------------------------------------
-const VISA_PATTERN     = /visa\s+sponsor(ship)?|relocation\s+(package|support|assistance|allowance|bonus)|sponsor(ing)?\s+(your\s+)?(visa|work\s+permit|relocation)|willing\s+to\s+sponsor|we\s+(will\s+)?sponsor|support\s+(with\s+)?relocation|highly\s+skilled\s+migrant|kennismigrant/i;
+const VISA_PATTERN     = /visa\s+sponsor(ship)?|relocation\s+(package|support|assistance|allowance|bonus)|sponsor(ing)?\s+(your\s+)?(visa|work\s+permit|relocation)|willing\s+to\s+sponsor|we\s+(will\s+)?sponsor|support\s+(with\s+)?relocation|highly\s+skilled\s+migrant|kennismigrant|patrocinio\s+de\s+visa(do)?|tramita(mos|remos|r)?\s+(el\s+)?visado|paquete\s+de\s+(relocalización|reubicación|relo)|apoyo\s+(con\s+)?(la\s+)?reubicación|gestión\s+del\s+visado|ayuda\s+(con\s+)?(el\s+)?visado/i;
 const STACK_PATTERN    = /\bphp\b|laravel|symfony|\bc#\b|asp\.net|\.net\s+(core|framework\b)|node\.?js/i;
 const ENGLISH_EXPLICIT = /english.{0,20}(work(ing)?|team|environment|language|office)|work(ing)?\s+language.{0,10}english|international\s+team|english.?speaking|all.communication.in.english/i;
 const AWS_PATTERN      = /\baws\b|amazon\s+web\s+services|\bec2\b|\bs3\b|\blambda\b|\brds\b|cloudformation|\beks\b|\becs\b|\bsqs\b|\bsns\b/i;
@@ -95,7 +95,13 @@ export const zarkoProfile: ProfileConfig = {
     },
     {
       type: 'tecnoempleo',
+      remoteOnly: true,
       queries: ['backend developer', 'fullstack developer', 'php developer', 'nodejs developer'],
+    },
+    {
+      type: 'tecnoempleo',
+      remoteOnly: false,
+      queries: ['backend developer php', 'fullstack developer', 'software developer visa'],
     },
   ],
 
@@ -123,6 +129,14 @@ export const zarkoProfile: ProfileConfig = {
     {
       reason: 'UK_LOCATION',
       test: (job: RawJob) => UK_LOCATION_PATTERN.test(job.location),
+    },
+    {
+      reason: 'Spain on-site role with no visa/sponsorship signal',
+      test: (job: RawJob) => {
+        const isSpainOnsite = /\b(spain|barcelona|madrid|valencia|seville|sevilla|bilbao|málaga|malaga|zaragoza)\b/i.test(job.location)
+          && !/remote/i.test(job.location);
+        return isSpainOnsite && !VISA_PATTERN.test(`${job.title} ${job.description}`);
+      },
     },
   ],
 
@@ -191,6 +205,7 @@ Hard dealbreakers (score 1-3 even if other criteria match):
 - Role requires Dutch/German/French/Spanish fluency
 - Pure outsourcing or staffing agency
 - Requires 5+ years experience
+- Spain on-site/hybrid role with no visa sponsorship or relocation package mentioned
 `.trim(),
 
   digest: {

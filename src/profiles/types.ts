@@ -40,7 +40,8 @@ export interface DigestConfig {
 export interface AdditionalSource {
   type: 'karriere-at' | 'tecnoempleo';
   queries: string[];
-  location?: string; // karriere-at: location slug e.g. 'wien'; tecnoempleo: ignored
+  location?: string;    // karriere-at: location slug e.g. 'wien'; tecnoempleo: ignored
+  remoteOnly?: boolean; // tecnoempleo: true = remote filter, false = all modalities
 }
 
 export interface ProfileConfig {
