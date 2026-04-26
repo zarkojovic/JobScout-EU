@@ -35,6 +35,8 @@ export function scoreJobsRuleBased(jobs: RawJob[], rules: ScoringRule[], cap: nu
   });
 }
 
+const AI_BATCH_SIZE = 20;
+
 export async function scoreJobs(
   jobs: RawJob[],
   rules: ScoringRule[],
@@ -42,9 +44,18 @@ export async function scoreJobs(
   geminiCriteriaBlock?: string
 ): Promise<ScoredJob[]> {
   if (process.env.GROQ_API_KEY && geminiCriteriaBlock) {
+    const preScored = scoreJobsRuleBased(jobs, rules, cap);
+    const sorted = [...preScored].sort((a, b) => b.score - a.score);
+    const topCandidates = sorted.slice(0, AI_BATCH_SIZE);
+    const remainder     = sorted.slice(AI_BATCH_SIZE);
+
+    console.log(`\n🎯 Pre-filter: top ${topCandidates.length}/${jobs.length} to Groq, ${remainder.length} stay rule-based`);
+
     const breakdownFields = rules.map(r => r.field);
-    return scoreJobsWithAI(jobs, geminiCriteriaBlock, cap, breakdownFields,
+    const aiScored = await scoreJobsWithAI(topCandidates, geminiCriteriaBlock, cap, breakdownFields,
       (batch) => scoreJobsRuleBased(batch, rules, cap));
+
+    return [...aiScored, ...remainder];
   }
   console.log('\n⚠️  GROQ_API_KEY not set — using rule-based scoring');
   return scoreJobsRuleBased(jobs, rules, cap);
