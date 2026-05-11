@@ -6,6 +6,7 @@
   "scripts": {
     "start": "tsx src/index.ts",
     "test:telegram": "tsx src/test-telegram.ts",
+    "send": "tsx src/test-telegram.ts zarko",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

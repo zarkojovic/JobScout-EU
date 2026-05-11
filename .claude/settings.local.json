@@ -12,7 +12,13 @@
       "Bash(chmod +x /home/zarko/Documents/jobscout-eu/run.sh)",
       "Bash(wc -l /home/zarko/Documents/jobscout-eu/src/*.ts /home/zarko/Documents/jobscout-eu/src/scrapers/*.ts)",
       "Bash(chmod +x:*)",
-      "Bash(ls /home/zarko/Documents/jobscout-eu/run*.sh)"
+      "Bash(ls /home/zarko/Documents/jobscout-eu/run*.sh)",
+      "WebFetch(domain:www.karriere.at)",
+      "WebFetch(domain:www.tecnoempleo.com)",
+      "Bash(npx tsx *)",
+      "Bash(PROFILE=eva /home/zarko/.nvm/versions/node/v24.14.0/bin/npm start *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }

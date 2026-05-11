@@ -37,5 +37,13 @@ export async function logResults(jobs: ScoredJob[], date: Date, logPath: string)
   console.log(`\n📝 Log saved: ${logFile}`);
   console.log(`   ${scored.length} scored, ${skipped.length} skipped, ${qualifying.length} qualify (≥7/10)`);
 
+  if (qualifying.length > 0) {
+    console.log('\n🔗 Qualifying jobs:');
+    for (const job of qualifying) {
+      console.log(`   [${job.score}/10] ${job.title} @ ${job.company} (${job.location})`);
+      console.log(`          ${job.url}`);
+    }
+  }
+
   return logFile;
 }

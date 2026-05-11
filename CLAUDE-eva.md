@@ -15,19 +15,24 @@ profile and sends top matches to Telegram every morning at 8am.
   Canva, Figma, Wordpress, Mailchimp, Google Analytics
 
 ## Target Roles
-- Marketing Manager
-- Performance Marketeer
-- Growth Marketing Manager
-- Demand Generation Marketing Manager
-- Marketing Consultant
-- Campaign Marketeer
-- B2B Marketing Manager
+- Marketing Manager / Marketing Lead
+- Marketing Communications Manager
+- Product Marketing Manager
+- Field & Demand Generation Marketing Manager
+- Growth Marketing Manager / Performance Marketing Manager
+- Digital Marketing Manager
+- B2B Marketing Manager / Brand Marketer
+- FinTech Marketing Specialist
+- Marketing Strategist
 
 ## Target Locations
-- Anywhere in EU (fully remote or hybrid)
-- United States (remote or relocation)
-- Zurich, Switzerland
+- Netherlands, Germany (EU — no visa needed)
+- Switzerland (Zurich or Geneva) — relocation or remote both fine
+- Serbia — only for US-based or major international companies
 - Singapore
+- United States — remote preferred; relocation with visa also acceptable
+- UAE / Gulf (Dubai, Abu Dhabi, Saudi Arabia) — international companies
+- EMEA relocation acceptable everywhere if relocation package offered
 - Priority: roles that are remote-first or location-flexible
 
 ## Preferred Industries
