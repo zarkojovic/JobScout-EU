@@ -6,6 +6,7 @@ export interface RawJob {
   url: string;
   description: string;
   postedAt: string;
+  applicantCount?: number; // undefined = not available from LinkedIn
 }
 
 export type ScoreBreakdown = Record<string, boolean>;

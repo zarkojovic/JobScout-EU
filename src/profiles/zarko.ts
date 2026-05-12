@@ -77,8 +77,8 @@ export const zarkoProfile: ProfileConfig = {
       { label: 'Amsterdam, Netherlands', geoId: '102890719', locationParam: 'Amsterdam, Netherlands' },
       { label: 'Utrecht, Netherlands',   geoId: '102011677', locationParam: 'Utrecht, Netherlands' },
       { label: 'Eindhoven, Netherlands', geoId: '103347519', locationParam: 'Eindhoven, Netherlands' },
-      // Austria
-      { label: 'Vienna, Austria',        geoId: '102062298', locationParam: 'Vienna, Austria' },
+      // Austria — country-level geoId; city-level (102062298) returns 0 on the guest API
+      { label: 'Vienna, Austria',        geoId: '103883259', locationParam: 'Vienna, Austria' },
       // Spain
       { label: 'Barcelona, Spain',       geoId: '100994331', locationParam: 'Barcelona, Spain' },
       { label: 'Madrid, Spain',          geoId: '101714026', locationParam: 'Madrid, Spain' },
@@ -88,11 +88,6 @@ export const zarkoProfile: ProfileConfig = {
   },
 
   additionalSources: [
-    {
-      type: 'karriere-at',
-      location: 'wien',
-      queries: ['backend developer', 'fullstack developer', 'php developer', 'software developer', 'dotnet developer'],
-    },
     {
       type: 'tecnoempleo',
       remoteOnly: true,
@@ -129,6 +124,13 @@ export const zarkoProfile: ProfileConfig = {
     {
       reason: 'UK_LOCATION',
       test: (job: RawJob) => UK_LOCATION_PATTERN.test(job.location),
+    },
+    {
+      // Country-level geoId returns all Austrian cities — keep Vienna/Wien only
+      reason: 'Austrian city outside Vienna',
+      test: (job: RawJob) =>
+        /austria|salzburg|graz|linz|innsbruck|klagenfurt|st\.?\s*p.lten|wels/i.test(job.location) &&
+        !/vienna|wien/i.test(job.location),
     },
     {
       reason: 'Spain on-site role with no visa/sponsorship signal',

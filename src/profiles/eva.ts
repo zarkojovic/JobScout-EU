@@ -106,6 +106,10 @@ export const evaProfile: ProfileConfig = {
       test: (job: RawJob) => MEDIA_ADV_PATTERN.test(job.description),
     },
     {
+      reason: 'Too many applicants (>50)',
+      test: (job: RawJob) => job.applicantCount !== undefined && job.applicantCount > 50,
+    },
+    {
       // Only block US jobs that explicitly require US work authorization — remote
       // jobs and roles offering visa/relocation are NOT blocked by this filter.
       reason: 'US role requires US work authorization (no visa offer)',

@@ -70,7 +70,14 @@ function parseJobCards(html: string): Array<{ jobId: string; title: string; comp
   return jobs;
 }
 
-async function fetchJobDescription(jobId: string): Promise<{ description: string; postedAt: string }> {
+function parseApplicantCount(html: string): number | undefined {
+  // Handles: "200 applicants", "Over 200 applicants", "Be among the first 25 applicants"
+  const match = html.match(/(?:over\s+)?(\d[\d,]*)\s+applicants?/i);
+  if (!match) return undefined;
+  return parseInt(match[1].replace(/,/g, ''), 10);
+}
+
+async function fetchJobDescription(jobId: string): Promise<{ description: string; postedAt: string; applicantCount?: number }> {
   try {
     const html = await fetchWithRetry(`${LINKEDIN_GUEST_BASE}/jobPosting/${jobId}`);
     const $ = cheerio.load(html);
@@ -86,7 +93,9 @@ async function fetchJobDescription(jobId: string): Promise<{ description: string
       .text()
       .trim();
 
-    return { description: description || 'No description available', postedAt: postedAt || 'Unknown' };
+    const applicantCount = parseApplicantCount($.text());
+
+    return { description: description || 'No description available', postedAt: postedAt || 'Unknown', applicantCount };
   } catch {
     return { description: 'Description unavailable', postedAt: 'Unknown' };
   }
@@ -170,8 +179,8 @@ async function scrapeLocation(
     const card = unique[i];
     process.stdout.write(`  [${i + 1}/${unique.length}] ${card.title} @ ${card.company}...`);
 
-    const { description, postedAt } = await fetchJobDescription(card.jobId);
-    jobs.push({ ...card, description, postedAt });
+    const { description, postedAt, applicantCount } = await fetchJobDescription(card.jobId);
+    jobs.push({ ...card, description, postedAt, applicantCount });
     console.log(' ✓');
 
     if (i < unique.length - 1) await sleep(REQUEST_DELAY_MS);
